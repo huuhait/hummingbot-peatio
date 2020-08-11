@@ -188,6 +188,18 @@ global_config_map = {
                   required_if=using_exchange("bittrex"),
                   is_secure=True,
                   is_connect_key=True),
+    "altmarkets_api_key":
+        ConfigVar(key="altmarkets_api_key",
+                  prompt="Enter your AltMarkets API key >>> ",
+                  required_if=using_exchange("altmarkets"),
+                  is_secure=True,
+                  is_connect_key=True),
+    "altmarkets_secret_key":
+        ConfigVar(key="altmarkets_secret_key",
+                  prompt="Enter your AltMarkets secret key >>> ",
+                  required_if=using_exchange("altmarkets"),
+                  is_secure=True,
+                  is_connect_key=True),
     "kucoin_api_key":
         ConfigVar(key="kucoin_api_key",
                   prompt="Enter your KuCoin API key >>> ",

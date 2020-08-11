@@ -24,6 +24,8 @@ fee_overrides_config_map = {
     "liquid_taker_fee": new_fee_config_var("liquid_taker_fee"),
     "bittrex_maker_fee": new_fee_config_var("bittrex_maker_fee"),
     "bittrex_taker_fee": new_fee_config_var("bittrex_taker_fee"),
+    "altmarkets_maker_fee": new_fee_config_var("altmarkets_maker_fee"),
+    "altmarkets_taker_fee": new_fee_config_var("altmarkets_taker_fee"),
     "kucoin_maker_fee": new_fee_config_var("kucoin_maker_fee"),
     "kucoin_taker_fee": new_fee_config_var("kucoin_taker_fee"),
     "kraken_maker_fee": new_fee_config_var("kraken_maker_fee"),

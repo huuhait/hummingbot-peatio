@@ -21,6 +21,8 @@ from hummingbot.market.liquid.liquid_market import LiquidOrderBookTracker, Liqui
 from hummingbot.market.kucoin.kucoin_market import KucoinOrderBookTracker, KucoinMarket
 from hummingbot.market.kraken.kraken_market import KrakenOrderBookTracker, KrakenMarket
 
+from hummingbot.market.altmarkets.altmarkets_market import AltmarketsOrderBookTracker, AltmarketsMarket
+
 ORDER_BOOK_TRACKER_CLASS = {
     "binance": BinanceOrderBookTracker,
     "coinbase_pro": CoinbaseProOrderBookTracker,
@@ -31,6 +33,7 @@ ORDER_BOOK_TRACKER_CLASS = {
     "dolomite": DolomiteOrderBookTracker,
     "liquid": LiquidOrderBookTracker,
     "kucoin": KucoinOrderBookTracker,
+    "altmarkets": AltmarketsOrderBookTracker,
     "kraken": KrakenOrderBookTracker
 }
 
@@ -45,6 +48,7 @@ MARKET_CLASSES = {
     "dolomite": DolomiteMarket,
     "liquid": LiquidMarket,
     "kucoin": KucoinMarket,
+    "altmarkets": AltmarketsMarket,
     "kraken": KrakenMarket
 }
 

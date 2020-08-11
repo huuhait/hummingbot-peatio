@@ -35,6 +35,7 @@ EXCHANGES = {
     "radar_relay",
     "dolomite",
     "bittrex",
+    "altmarkets",
     "kucoin",
     "eterbase",
     "kraken"
@@ -52,6 +53,7 @@ EXAMPLE_PAIRS = {
     "bamboo_relay": "ZRX-WETH",
     "binance": "ZRX-ETH",
     "bittrex": "ZRX-ETH",
+    "altmarkets": "ALTM-BTC",
     "kucoin": "ETH-USDT",
     "coinbase_pro": "ETH-USDC",
     "dolomite": "WETH-DAI",
@@ -66,6 +68,7 @@ EXAMPLE_ASSETS = {
     "bamboo_relay": "ZRX",
     "binance": "ZRX",
     "bittrex": "ZRX",
+    "altmarkets": "ALTM",
     "kucoin": "ETH",
     "coinbase_pro": "ETH",
     "dolomite": "LRC",
