@@ -24,6 +24,7 @@ cdef class AltmarketsMarket(MarketBase):
         dict _trading_rules
         public object _trading_rules_polling_task
         TransactionTracker _tx_tracker
+        object _throttler
 
     cdef c_did_timeout_tx(self, str tracking_id)
     cdef c_start_tracking_order(self,

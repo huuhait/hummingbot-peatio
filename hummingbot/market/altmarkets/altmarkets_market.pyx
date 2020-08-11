@@ -45,6 +45,7 @@ from hummingbot.core.event.events import (
     TradeFee
 )
 from hummingbot.core.network_iterator import NetworkStatus
+from hummingbot.core.utils.asyncio_throttle import Throttler
 from hummingbot.core.utils.async_call_scheduler import AsyncCallScheduler
 from hummingbot.core.utils.async_utils import (
     safe_ensure_future,
@@ -143,6 +144,7 @@ cdef class AltmarketsMarket(MarketBase):
         self._trading_rules = {}
         self._trading_rules_polling_task = None
         self._tx_tracker = AltmarketsMarketTransactionTracker(self)
+        self._throttler = Throttler(rate_limit = (5.0, 1.0))
 
     @staticmethod
     def split_trading_pair(trading_pair: str) -> Optional[Tuple[str, str]]:
@@ -284,74 +286,76 @@ cdef class AltmarketsMarket(MarketBase):
                            params: Optional[Dict[str, Any]] = None,
                            data=None,
                            is_auth_required: bool = False,
-                           try_count: int = 0) -> Dict[str, Any]:
-        content_type = "application/json" if method == "post" else "application/x-www-form-urlencoded"
-        headers = {"Content-Type": content_type}
-        url = Constants.EXCHANGE_ROOT_API + path_url
-        # Altmarkets rate limit is 100 https requests per 10 seconds
-        random.seed()
-        randSleep = (random.randint(1, 9) + random.randint(1, 5)) / 10
-        await asyncio.sleep(0.1 + randSleep)
-        client = await self._http_client()
-        if is_auth_required:
-            headers = self._altmarkets_auth.get_headers()
+                           try_count: int = 0,
+                           request_weight: int = 1) -> Dict[str, Any]:
+        async with self._throttler.weighted_task(request_weight=request_weight):
+            content_type = "application/json" if method == "post" else "application/x-www-form-urlencoded"
+            headers = {"Content-Type": content_type}
+            url = Constants.EXCHANGE_ROOT_API + path_url
+            # Altmarkets rate limit is 100 https requests per 10 seconds
+            random.seed()
+            randSleep = (random.randint(1, 5) + random.randint(1, 5)) / 10
+            await asyncio.sleep(0.1 + randSleep)
+            client = await self._http_client()
+            if is_auth_required:
+                headers = self._altmarkets_auth.get_headers()
 
-        # aiohttp TestClient requires path instead of url
-        if isinstance(client, TestClient):
-            response_coro = client.request(
-                method=method.upper(),
-                path=f"/{path_url}",
-                headers=headers,
-                params=params,
-                data=ujson.dumps(data),
-                timeout=100
-            )
-        else:
-            response_coro = client.request(
-                method=method.upper(),
-                url=url,
-                headers=headers,
-                params=params,
-                data=ujson.dumps(data),
-                timeout=100
-            )
+            # aiohttp TestClient requires path instead of url
+            if isinstance(client, TestClient):
+                response_coro = client.request(
+                    method=method.upper(),
+                    path=f"/{path_url}",
+                    headers=headers,
+                    params=params,
+                    data=ujson.dumps(data),
+                    timeout=100
+                )
+            else:
+                response_coro = client.request(
+                    method=method.upper(),
+                    url=url,
+                    headers=headers,
+                    params=params,
+                    data=ujson.dumps(data),
+                    timeout=100
+                )
 
-        async with response_coro as response:
-            # Debug logging output here, can remove all this ...
-            # self.logger().info(f"ALTM Req: {url}. \n Params: {params}\n")
-            # self.logger().info(f"ALTM Req Headers: {headers}\n Status: {response.status}. ")
-            # Debug logging ^
-            if response.status not in [200, 201]:
-                if try_count < 3:
-                    await asyncio.sleep(5 + (randSleep * (2 + try_count)))
-                    self.logger().info(f"Error fetching data from {url}. HTTP status is {response.status}. Retrying.")
-                    data = await self._api_request(method = method,
-                                                   path_url = path_url,
-                                                   params = params,
-                                                   data = None,
-                                                   is_auth_required = is_auth_required,
-                                                   try_count = try_count + 1)
-                    return data
+            async with response_coro as response:
                 # Debug logging output here, can remove all this ...
-                self.logger().info(f"ALTM Req: {url}. \n Params: {params}\n")
-                self.logger().info(f"ALTM Req Headers: {headers}\n Status: {response.status}. ")
+                # self.logger().info(f"ALTM Req: {url}. \n Params: {params}\n")
+                # self.logger().info(f"ALTM Req Headers: {headers}\n Status: {response.status}. ")
+                # Debug logging ^
+                if response.status not in [200, 201]:
+                    if try_count < 3:
+                        await asyncio.sleep(10 + (randSleep * (2 + try_count)))
+                        self.logger().info(f"Error fetching data from {url}. HTTP status is {response.status}. Retrying.")
+                        data = await self._api_request(method = method,
+                                                       path_url = path_url,
+                                                       params = params,
+                                                       data = None,
+                                                       is_auth_required = is_auth_required,
+                                                       try_count = try_count + 1)
+                        return data
+                    # Debug logging output here, can remove all this ...
+                    self.logger().info(f"ALTM Req: {url}. \n Params: {params}\n")
+                    self.logger().info(f"ALTM Req Headers: {headers}\n Status: {response.status}. ")
+                    try:
+                        parsed_response = await response.json()
+                        self.logger().info(f"ALTM Req json: {parsed_response}. ")
+                    except Exception as e:
+                        pass
+                    # Debug logging ^
+                    raise IOError(f"Error fetching data from {url}. HTTP status is {response.status}.")
                 try:
                     parsed_response = await response.json()
-                    self.logger().info(f"ALTM Req json: {parsed_response}. ")
-                except Exception as e:
-                    pass
-                # Debug logging ^
-                raise IOError(f"Error fetching data from {url}. HTTP status is {response.status}.")
-            try:
-                parsed_response = await response.json()
-            except Exception:
-                raise IOError(f"Error parsing data from {url}.")
+                except Exception:
+                    raise IOError(f"Error parsing data from {url}.")
 
-            data = parsed_response
-            if data is None:
-                self.logger().error(f"Error received from {url}. Response is {parsed_response}.")
-                raise AltmarketsAPIError({"error": parsed_response})
-            return data
+                data = parsed_response
+                if data is None:
+                    self.logger().error(f"Error received from {url}. Response is {parsed_response}.")
+                    raise AltmarketsAPIError({"error": parsed_response})
+                return data
 
     async def _update_balances(self):
         cdef:
