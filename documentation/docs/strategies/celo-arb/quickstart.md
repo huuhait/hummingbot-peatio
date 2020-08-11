@@ -99,7 +99,7 @@ docker run -it \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_conf,destination=/conf/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_logs,destination=/logs/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_data,destination=/data/" \
-coinalpha/hummingbot:latest
+theholiestroger/hummingbot:latest
 ```
 
 Afterwards, Hummingbot will start automatically and prompt you to set a password. After you exit, you can use the `./start.sh` and `./update.sh` commands to run and update Hummingbot, respectively.

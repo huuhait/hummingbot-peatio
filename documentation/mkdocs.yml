@@ -5,8 +5,8 @@ site_author: 'CoinAlpha, Inc.'
 site_url: 'https://docs.hummingbot.io'
 
 # Repository
-repo_name: 'coinalpha/hummingbot'
-repo_url: 'https://github.com/coinalpha/hummingbot'
+repo_name: 'TheHolyRoger/hummingbot'
+repo_url: 'https://github.com/TheHolyRoger/hummingbot'
 edit_uri: 'blob/master/documentation/docs/'
 
 # Copyright
@@ -34,7 +34,7 @@ extra:
     - type: 'globe'
       link: 'https://www.hummingbot.io'
     - type: 'github'
-      link: 'https://github.com/coinalpha/hummingbot'
+      link: 'https://github.com/TheHolyRoger/hummingbot'
     - type: 'twitter'
       link: 'https://twitter.com/hummingbot_io'
 google_analytics:

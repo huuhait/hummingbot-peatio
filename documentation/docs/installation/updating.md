@@ -4,7 +4,7 @@
 
 We regularly update Hummingbot (see [Release Notes](/release-notes/)) and recommend users to regularly update their installations to get the latest version of the software.  
 
-Updating to the latest docker image (e.g. `coinalpha/hummingbot:latest`) requires users to (1) delete any instances of Hummingbot using that image, (2) delete the old image, and (3) recreate the Hummingbot instance:
+Updating to the latest docker image (e.g. `theholiestroger/hummingbot:latest`) requires users to (1) delete any instances of Hummingbot using that image, (2) delete the old image, and (3) recreate the Hummingbot instance:
 
 ```bash tab="Script"
 # 1) Download update script
@@ -22,7 +22,7 @@ chmod a+x update.sh
 docker rm hummingbot-instance
 
 # 2) Delete old hummingbot image
-docker image rm coinalpha/hummingbot:latest
+docker image rm theholiestroger/hummingbot:latest
 
 # 3) Re-create instance with latest hummingbot release
 docker run -it \
@@ -31,7 +31,7 @@ docker run -it \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_conf,destination=/conf/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_logs,destination=/logs/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_data,destination=/data/" \
-coinalpha/hummingbot:latest
+theholiestroger/hummingbot:latest
 ```
 
 

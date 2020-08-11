@@ -83,7 +83,7 @@ docker run -it \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_logs,destination=/logs/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_data,destination=/data/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_scripts,destination=/scripts/" \
-coinalpha/hummingbot:latest
+theholiestroger/hummingbot:latest
 ```
 
 ## Debian
@@ -166,7 +166,7 @@ docker run -it \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_logs,destination=/logs/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_data,destination=/data/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_scripts,destination=/scripts/" \
-coinalpha/hummingbot:latest
+theholiestroger/hummingbot:latest
 ```
 
 ## CentOS
@@ -247,7 +247,7 @@ docker run -it \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_logs,destination=/logs/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_data,destination=/data/" \
 --mount "type=bind,source=$(pwd)/hummingbot_files/hummingbot_scripts,destination=/scripts/" \
-coinalpha/hummingbot:latest
+theholiestroger/hummingbot:latest
 ```
 
 ## Running Hummingbot in the background
@@ -276,7 +276,7 @@ A previous version can be installed when creating a Hummingbot instance.
 
 ```
 
- For example, enter `version-0.16.0`. The versions are listed here in [Hummingbot Tags](https://hub.docker.com/r/coinalpha/hummingbot/tags).
+ For example, enter `version-0.16.0`. The versions are listed here in [Hummingbot Tags](https://hub.docker.com/r/theholiestroger/hummingbot/tags).
 
 ----
 
