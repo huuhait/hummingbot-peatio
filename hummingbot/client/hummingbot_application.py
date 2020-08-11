@@ -14,6 +14,7 @@ from hummingbot.logger import HummingbotLogger
 from hummingbot.logger.application_warning import ApplicationWarning
 from hummingbot.market.binance.binance_market import BinanceMarket
 from hummingbot.market.bittrex.bittrex_market import BittrexMarket
+from hummingbot.market.altmarkets.altmarkets_market import AltmarketsMarket
 from hummingbot.market.kucoin.kucoin_market import KucoinMarket
 from hummingbot.market.coinbase_pro.coinbase_pro_market import CoinbaseProMarket
 from hummingbot.market.huobi.huobi_market import HuobiMarket
@@ -59,6 +60,7 @@ MARKET_CLASSES = {
     "radar_relay": RadarRelayMarket,
     "dolomite": DolomiteMarket,
     "bittrex": BittrexMarket,
+    "altmarkets": AltmarketsMarket,
     "kucoin": KucoinMarket,
     "eterbase": EterbaseMarket,
     "kraken": KrakenMarket
@@ -328,6 +330,14 @@ class HummingbotApplication(*commands):
                                        order_book_tracker_data_source_type=OrderBookTrackerDataSourceType.EXCHANGE_API,
                                        trading_pairs=trading_pairs,
                                        trading_required=self._trading_required)
+            elif market_name == "altmarkets":
+                altmarkets_api_key = global_config_map.get("altmarkets_api_key").value
+                altmarkets_secret_key = global_config_map.get("altmarkets_secret_key").value
+                market = AltmarketsMarket(altmarkets_api_key,
+                                          altmarkets_secret_key,
+                                          order_book_tracker_data_source_type=OrderBookTrackerDataSourceType.EXCHANGE_API,
+                                          trading_pairs=trading_pairs,
+                                          trading_required=self._trading_required)
             elif market_name == "kucoin":
                 kucoin_api_key = global_config_map.get("kucoin_api_key").value
                 kucoin_secret_key = global_config_map.get("kucoin_secret_key").value

@@ -16,6 +16,7 @@ OPTIONS = {
     "huobi",
     "liquid",
     "bittrex",
+    "altmarkets",
     "kucoin",
     "kraken",
     "ethereum",

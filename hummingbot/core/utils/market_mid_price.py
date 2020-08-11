@@ -2,12 +2,14 @@ import requests
 from decimal import Decimal
 from typing import Optional
 import cachetools.func
+from hummingbot.market.altmarkets.altmarkets_market import AltmarketsMarket
 from hummingbot.market.binance.binance_market import BinanceMarket
 from hummingbot.market.kraken.kraken_market import KrakenMarket
 
 
 BINANCE_PRICE_URL = "https://api.binance.com/api/v3/ticker/bookTicker"
 KUCOIN_PRICE_URL = "https://api.kucoin.com/api/v1/market/allTickers"
+ALTMARKETS_PRICE_URL = "https://v2.altmarkets.io/api/v2/peatio/public/markets/tickers"
 LIQUID_PRICE_URL = "https://api.liquid.com/products"
 BITTREX_PRICE_URL = "https://api.bittrex.com/api/v1.1/public/getmarketsummaries"
 KRAKEN_PRICE_URL = "https://api.kraken.com/0/public/Ticker?pair="
@@ -19,6 +21,8 @@ def get_mid_price(exchange: str, trading_pair: str) -> Optional[Decimal]:
         return binance_mid_price(trading_pair)
     elif exchange == "kucoin":
         return kucoin_mid_price(trading_pair)
+    elif exchange == "altmarkets":
+        return altmarkets_mid_price(trading_pair)
     elif exchange == "liquid":
         return liquid_mid_price(trading_pair)
     elif exchange == "bittrex":
@@ -52,6 +56,22 @@ def kucoin_mid_price(trading_pair: str) -> Optional[Decimal]:
     for record in records["data"]["ticker"]:
         if trading_pair == record["symbolName"] and record["buy"] is not None and record["sell"] is not None:
             result = (Decimal(record["buy"]) + Decimal(record["sell"])) / Decimal("2")
+            break
+    return result
+
+
+@cachetools.func.ttl_cache(ttl=10)
+def altmarkets_mid_price(trading_pair: str) -> Optional[Decimal]:
+    resp = requests.get(url=ALTMARKETS_PRICE_URL)
+    records = resp.json()
+    result = None
+    for tag in list(records.keys()):
+        record = records[tag]
+        pair = AltmarketsMarket.convert_from_exchange_trading_pair(tag)
+        if trading_pair == pair and record["ticker"]["open"] is not None and record["ticker"]["last"] is not None:
+            result = ((Decimal(record["ticker"]["open"]) * Decimal('1')) + (Decimal(record["ticker"]["last"]) * Decimal('3'))) / Decimal("4")
+            if result <= 0:
+                result = Decimal('0.00000001')
             break
     return result
 
