@@ -472,7 +472,7 @@ cdef class AltmarketsMarket(MarketBase):
     async def _update_order_message(self, exchange_order_id, content, tracked_order):
         order_state = content.get("state")
         # possible order states are "wait", "done", "cancel", "pending"
-        if order_state not in ["done", "cancel", "wait", "pending"]:
+        if order_state not in ["done", "cancel", "wait", "pending", "reject"]:
             self.logger().info(f"Unrecognized order update response - {content}")
 
         # Calculate the newly executed amount for this update.
