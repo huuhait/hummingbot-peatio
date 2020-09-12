@@ -45,7 +45,7 @@ cdef class AltmarketsInFlightOrder(InFlightOrderBase):
 
     @property
     def is_failure(self) -> bool:
-        return self.last_state in {"cancel"}
+        return self.last_state in {"cancel", "reject"}
 
     @property
     def is_open(self) -> bool:
