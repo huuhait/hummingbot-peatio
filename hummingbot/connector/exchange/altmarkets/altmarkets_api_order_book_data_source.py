@@ -10,19 +10,19 @@ from hummingbot.core.data_type.order_book_message import OrderBookMessage
 from hummingbot.core.data_type.order_book_tracker_data_source import OrderBookTrackerDataSource
 # from hummingbot.core.utils.async_utils import safe_gather
 from hummingbot.logger import HummingbotLogger
-from .altmarkets_constants import Constants
-from .altmarkets_active_order_tracker import AltmarketsActiveOrderTracker
-from .altmarkets_order_book import AltmarketsOrderBook
-from .altmarkets_websocket import AltmarketsWebsocket
-from .altmarkets_utils import (
+from .peatio_constants import Constants
+from .peatio_active_order_tracker import PeatioActiveOrderTracker
+from .peatio_order_book import PeatioOrderBook
+from .peatio_websocket import PeatioWebsocket
+from .peatio_utils import (
     convert_to_exchange_trading_pair,
     convert_from_exchange_trading_pair,
     api_call_with_retries,
-    AltmarketsAPIError,
+    PeatioAPIError,
 )
 
 
-class AltmarketsAPIOrderBookDataSource(OrderBookTrackerDataSource):
+class PeatioAPIOrderBookDataSource(OrderBookTrackerDataSource):
     _logger: Optional[HummingbotLogger] = None
 
     @classmethod
@@ -75,7 +75,7 @@ class AltmarketsAPIOrderBookDataSource(OrderBookTrackerDataSource):
             orderbook_response: Dict[Any] = await api_call_with_retries("GET", endpoint,
                                                                         params={"limit": 300})
             return orderbook_response
-        except AltmarketsAPIError as e:
+        except PeatioAPIError as e:
             err = e.error_payload.get('errors', e.error_payload)
             raise IOError(
                 f"Error fetching OrderBook for {trading_pair} at {Constants.EXCHANGE_NAME}. "
@@ -84,12 +84,12 @@ class AltmarketsAPIOrderBookDataSource(OrderBookTrackerDataSource):
     async def get_new_order_book(self, trading_pair: str) -> OrderBook:
         snapshot: Dict[str, Any] = await self.get_order_book_data(trading_pair)
         snapshot_timestamp: float = time.time()
-        snapshot_msg: OrderBookMessage = AltmarketsOrderBook.snapshot_message_from_exchange(
+        snapshot_msg: OrderBookMessage = PeatioOrderBook.snapshot_message_from_exchange(
             snapshot,
             snapshot_timestamp,
             metadata={"trading_pair": trading_pair})
         order_book = self.order_book_create_function()
-        active_order_tracker: AltmarketsActiveOrderTracker = AltmarketsActiveOrderTracker()
+        active_order_tracker: PeatioActiveOrderTracker = PeatioActiveOrderTracker()
         bids, asks = active_order_tracker.convert_snapshot_message_to_order_book_row(snapshot_msg)
         order_book.apply_snapshot(bids, asks, snapshot_msg.update_id)
         return order_book
@@ -100,7 +100,7 @@ class AltmarketsAPIOrderBookDataSource(OrderBookTrackerDataSource):
         """
         while True:
             try:
-                ws = AltmarketsWebsocket()
+                ws = PeatioWebsocket()
 
                 await ws.connect()
 
@@ -116,12 +116,12 @@ class AltmarketsAPIOrderBookDataSource(OrderBookTrackerDataSource):
                             split_key = msg_key.split(Constants.WS_METHODS['TRADES_UPDATE'], 1)
                             if len(split_key) != 2:
                                 # Debug log output for pub WS messages
-                                self.logger().info(f"Unrecognized message received from Altmarkets websocket: {response}")
+                                self.logger().info(f"Unrecognized message received from Peatio websocket: {response}")
                                 continue
                             trading_pair = convert_from_exchange_trading_pair(split_key[0])
                             for trade in response[msg_key]["trades"]:
                                 trade_timestamp: int = int(trade.get('date', time.time()))
-                                trade_msg: OrderBookMessage = AltmarketsOrderBook.trade_message_from_exchange(
+                                trade_msg: OrderBookMessage = PeatioOrderBook.trade_message_from_exchange(
                                     trade,
                                     trade_timestamp,
                                     metadata={"trading_pair": trading_pair})
@@ -141,7 +141,7 @@ class AltmarketsAPIOrderBookDataSource(OrderBookTrackerDataSource):
         """
         while True:
             try:
-                ws = AltmarketsWebsocket()
+                ws = PeatioWebsocket()
                 await ws.connect()
 
                 ws_streams = [
@@ -155,14 +155,14 @@ class AltmarketsAPIOrderBookDataSource(OrderBookTrackerDataSource):
                         for msg_key in list(response.keys()):
                             # split_key = msg_key.split(Constants.WS_METHODS['TRADES_UPDATE'], 1)
                             if Constants.WS_METHODS['ORDERS_UPDATE'] in msg_key:
-                                order_book_msg_cls = AltmarketsOrderBook.diff_message_from_exchange
+                                order_book_msg_cls = PeatioOrderBook.diff_message_from_exchange
                                 split_key = msg_key.split(Constants.WS_METHODS['ORDERS_UPDATE'], 1)
                             elif Constants.WS_METHODS['ORDERS_SNAPSHOT'] in msg_key:
-                                order_book_msg_cls = AltmarketsOrderBook.snapshot_message_from_exchange
+                                order_book_msg_cls = PeatioOrderBook.snapshot_message_from_exchange
                                 split_key = msg_key.split(Constants.WS_METHODS['ORDERS_SNAPSHOT'], 1)
                             else:
                                 # Debug log output for pub WS messages
-                                self.logger().info(f"Unrecognized message received from Altmarkets websocket: {response}")
+                                self.logger().info(f"Unrecognized message received from Peatio websocket: {response}")
                                 continue
                             order_book_data: str = response.get(msg_key, None)
                             timestamp: int = int(time.time())
@@ -195,7 +195,7 @@ class AltmarketsAPIOrderBookDataSource(OrderBookTrackerDataSource):
                     try:
                         snapshot: Dict[str, Any] = await self.get_order_book_data(trading_pair)
                         snapshot_timestamp: int = int(snapshot["timestamp"])
-                        snapshot_msg: OrderBookMessage = AltmarketsOrderBook.snapshot_message_from_exchange(
+                        snapshot_msg: OrderBookMessage = PeatioOrderBook.snapshot_message_from_exchange(
                             snapshot,
                             snapshot_timestamp,
                             metadata={"trading_pair": trading_pair}

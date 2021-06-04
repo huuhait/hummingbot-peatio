@@ -37,11 +37,11 @@ from hummingbot.core.event.events import (
     TradeFee
 )
 from hummingbot.connector.exchange_base import ExchangeBase
-from hummingbot.connector.exchange.altmarkets.altmarkets_order_book_tracker import AltmarketsOrderBookTracker
-from hummingbot.connector.exchange.altmarkets.altmarkets_user_stream_tracker import AltmarketsUserStreamTracker
-from hummingbot.connector.exchange.altmarkets.altmarkets_auth import AltmarketsAuth
-from hummingbot.connector.exchange.altmarkets.altmarkets_in_flight_order import AltmarketsInFlightOrder
-from hummingbot.connector.exchange.altmarkets.altmarkets_utils import (
+from hummingbot.connector.exchange.peatio.peatio_order_book_tracker import PeatioOrderBookTracker
+from hummingbot.connector.exchange.peatio.peatio_user_stream_tracker import PeatioUserStreamTracker
+from hummingbot.connector.exchange.peatio.peatio_auth import PeatioAuth
+from hummingbot.connector.exchange.peatio.peatio_in_flight_order import PeatioInFlightOrder
+from hummingbot.connector.exchange.peatio.peatio_utils import (
     REQUEST_THROTTLER,
     convert_from_exchange_trading_pair,
     convert_to_exchange_trading_pair,
@@ -49,18 +49,18 @@ from hummingbot.connector.exchange.altmarkets.altmarkets_utils import (
     aiohttp_response_with_errors,
     retry_sleep_time,
     str_date_to_ts,
-    AltmarketsAPIError,
+    PeatioAPIError,
 )
-from hummingbot.connector.exchange.altmarkets.altmarkets_constants import Constants
+from hummingbot.connector.exchange.peatio.peatio_constants import Constants
 from hummingbot.core.data_type.common import OpenOrder
 ctce_logger = None
 s_decimal_NaN = Decimal("nan")
 s_decimal_0 = Decimal(0)
 
 
-class AltmarketsExchange(ExchangeBase):
+class PeatioExchange(ExchangeBase):
     """
-    AltmarketsExchange connects with AltMarkets.io exchange and provides order book pricing, user account tracking and
+    PeatioExchange connects with AltMarkets.io exchange and provides order book pricing, user account tracking and
     trading functionality.
     """
     ORDER_NOT_EXIST_CONFIRMATION_COUNT = 3
@@ -74,28 +74,28 @@ class AltmarketsExchange(ExchangeBase):
         return ctce_logger
 
     def __init__(self,
-                 altmarkets_api_key: str,
-                 altmarkets_secret_key: str,
+                 peatio_api_key: str,
+                 peatio_secret_key: str,
                  trading_pairs: Optional[List[str]] = None,
                  trading_required: bool = True
                  ):
         """
-        :param altmarkets_api_key: The API key to connect to private AltMarkets.io APIs.
-        :param altmarkets_secret_key: The API secret.
+        :param peatio_api_key: The API key to connect to private AltMarkets.io APIs.
+        :param peatio_secret_key: The API secret.
         :param trading_pairs: The market trading pairs which to track order book data.
         :param trading_required: Whether actual trading is needed.
         """
         super().__init__()
         self._trading_required = trading_required
         self._trading_pairs = trading_pairs
-        self._altmarkets_auth = AltmarketsAuth(altmarkets_api_key, altmarkets_secret_key)
-        self._order_book_tracker = AltmarketsOrderBookTracker(trading_pairs=trading_pairs)
-        self._user_stream_tracker = AltmarketsUserStreamTracker(self._altmarkets_auth, trading_pairs)
+        self._peatio_auth = PeatioAuth(peatio_api_key, peatio_secret_key)
+        self._order_book_tracker = PeatioOrderBookTracker(trading_pairs=trading_pairs)
+        self._user_stream_tracker = PeatioUserStreamTracker(self._peatio_auth, trading_pairs)
         self._ev_loop = asyncio.get_event_loop()
         self._shared_client = None
         self._poll_notifier = asyncio.Event()
         self._last_timestamp = 0
-        self._in_flight_orders = {}  # Dict[client_order_id:str, AltmarketsInFlightOrder]
+        self._in_flight_orders = {}  # Dict[client_order_id:str, PeatioInFlightOrder]
         self._order_not_found_records = {}  # Dict[client_order_id:str, count:int]
         self._trading_rules = {}  # Dict[trading_pair:str, TradingRule]
         self._status_polling_task = None
@@ -106,7 +106,7 @@ class AltmarketsExchange(ExchangeBase):
 
     @property
     def name(self) -> str:
-        return "altmarkets"
+        return "peatio"
 
     @property
     def order_books(self) -> Dict[str, OrderBook]:
@@ -117,7 +117,7 @@ class AltmarketsExchange(ExchangeBase):
         return self._trading_rules
 
     @property
-    def in_flight_orders(self) -> Dict[str, AltmarketsInFlightOrder]:
+    def in_flight_orders(self) -> Dict[str, PeatioInFlightOrder]:
         return self._in_flight_orders
 
     @property
@@ -166,7 +166,7 @@ class AltmarketsExchange(ExchangeBase):
         :param saved_states: The saved tracking_states.
         """
         self._in_flight_orders.update({
-            key: AltmarketsInFlightOrder.from_json(value)
+            key: PeatioInFlightOrder.from_json(value)
             for key, value in saved_states.items()
         })
 
@@ -328,7 +328,7 @@ class AltmarketsExchange(ExchangeBase):
             # Generate auth headers if needed.
             headers: dict = {"Content-Type": "application/json", "User-Agent": Constants.USER_AGENT}
             if is_auth_required:
-                headers: dict = self._altmarkets_auth.get_headers()
+                headers: dict = self._peatio_auth.get_headers()
             # Build request coro
             response_coro = shared_client.request(method=method.upper(), url=url, headers=headers,
                                                   params=qs_params, data=req_params,
@@ -347,11 +347,11 @@ class AltmarketsExchange(ExchangeBase):
                     return await self._api_request(method=method, endpoint=endpoint, params=params,
                                                    is_auth_required=is_auth_required, try_count=try_count)
                 else:
-                    raise AltmarketsAPIError({"errors": parsed_response, "status": http_status})
+                    raise PeatioAPIError({"errors": parsed_response, "status": http_status})
             if "errors" in parsed_response or "error" in parsed_response:
                 if "error" in parsed_response and "errors" not in parsed_response:
                     parsed_response['errors'] = parsed_response['error']
-                raise AltmarketsAPIError(parsed_response)
+                raise PeatioAPIError(parsed_response)
             return parsed_response
 
     def get_order_price_quantum(self, trading_pair: str, price: Decimal):
@@ -470,7 +470,7 @@ class AltmarketsExchange(ExchangeBase):
         except asyncio.CancelledError:
             raise
         except Exception as e:
-            if isinstance(e, AltmarketsAPIError):
+            if isinstance(e, PeatioAPIError):
                 error_reason = e.error_payload.get('error', {}).get('message', e.error_payload.get('errors'))
             else:
                 error_reason = str(e)
@@ -495,7 +495,7 @@ class AltmarketsExchange(ExchangeBase):
         """
         Starts tracking an order by simply adding it into _in_flight_orders dictionary.
         """
-        self._in_flight_orders[order_id] = AltmarketsInFlightOrder(
+        self._in_flight_orders[order_id] = PeatioInFlightOrder(
             client_order_id=order_id,
             exchange_order_id=exchange_order_id,
             trading_pair=trading_pair,
@@ -541,7 +541,7 @@ class AltmarketsExchange(ExchangeBase):
                 order_state = response.get("state", None)
         except asyncio.CancelledError:
             raise
-        except AltmarketsAPIError as e:
+        except PeatioAPIError as e:
             errors_found = e.error_payload.get('errors', e.error_payload)
             if isinstance(errors_found, dict):
                 order_state = errors_found.get("state", None)
@@ -631,7 +631,7 @@ class AltmarketsExchange(ExchangeBase):
             responses = await safe_gather(*tasks, return_exceptions=True)
             for response, tracked_order in zip(responses, tracked_orders):
                 client_order_id = tracked_order.client_order_id
-                if isinstance(response, AltmarketsAPIError):
+                if isinstance(response, PeatioAPIError):
                     err = response.error_payload.get('errors', response.error_payload)
                     if "record.not_found" in err:
                         self._order_not_found_records[client_order_id] = \
@@ -742,7 +742,7 @@ class AltmarketsExchange(ExchangeBase):
         self._account_balances[asset_name] = Decimal(str(balance_message["locked"])) + Decimal(str(balance_message["balance"]))
 
     async def _trigger_order_fill(self,
-                                  tracked_order: AltmarketsInFlightOrder,
+                                  tracked_order: PeatioInFlightOrder,
                                   update_msg: Dict[str, Any]):
         executed_price = Decimal(str(update_msg.get("price")
                                      if update_msg.get("price") is not None
@@ -858,7 +858,7 @@ class AltmarketsExchange(ExchangeBase):
     async def _user_stream_event_listener(self):
         """
         Listens to message in _user_stream_tracker.user_stream queue. The messages are put in by
-        AltmarketsAPIUserStreamDataSource.
+        PeatioAPIUserStreamDataSource.
         """
         async for event_message in self._iter_user_event_queue():
             try:

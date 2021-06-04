@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 connector_status = {
-    'altmarkets': 'green',
+    'peatio': 'green',
     'ascend_ex': 'yellow',
     'balancer': 'green',
     'beaxy': 'green',

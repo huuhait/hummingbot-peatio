@@ -15,7 +15,7 @@ from hummingbot.core.utils.asyncio_throttle import Throttler
 from hummingbot.core.utils.tracking_nonce import get_tracking_nonce
 from hummingbot.client.config.config_var import ConfigVar
 from hummingbot.client.config.config_methods import using_exchange
-from .altmarkets_constants import Constants
+from .peatio_constants import Constants
 
 
 TRADING_PAIR_SPLITTER = re.compile(Constants.TRADING_PAIR_SPLITTER)
@@ -29,7 +29,7 @@ DEFAULT_FEES = [0.1, 0.2]
 REQUEST_THROTTLER = Throttler(rate_limit = (8.0, 6.0))
 
 
-class AltmarketsAPIError(IOError):
+class PeatioAPIError(IOError):
     def __init__(self, error_payload: Dict[str, Any]):
         super().__init__(str(error_payload))
         self.error_payload = error_payload
@@ -151,25 +151,25 @@ async def api_call_with_retries(method,
                 return await api_call_with_retries(method=method, endpoint=endpoint, params=params,
                                                    shared_client=shared_client, try_count=try_count)
             else:
-                raise AltmarketsAPIError({"errors": parsed_response, "status": http_status})
+                raise PeatioAPIError({"errors": parsed_response, "status": http_status})
         if "errors" in parsed_response or "error" in parsed_response:
             if "error" in parsed_response and "errors" not in parsed_response:
                 parsed_response['errors'] = parsed_response['error']
-            raise AltmarketsAPIError(parsed_response)
+            raise PeatioAPIError(parsed_response)
         return parsed_response
 
 
 KEYS = {
-    "altmarkets_api_key":
-        ConfigVar(key="altmarkets_api_key",
+    "peatio_api_key":
+        ConfigVar(key="peatio_api_key",
                   prompt=f"Enter your {Constants.EXCHANGE_NAME} API key >>> ",
-                  required_if=using_exchange("altmarkets"),
+                  required_if=using_exchange("peatio"),
                   is_secure=True,
                   is_connect_key=True),
-    "altmarkets_secret_key":
-        ConfigVar(key="altmarkets_secret_key",
+    "peatio_secret_key":
+        ConfigVar(key="peatio_secret_key",
                   prompt=f"Enter your {Constants.EXCHANGE_NAME} secret key >>> ",
-                  required_if=using_exchange("altmarkets"),
+                  required_if=using_exchange("peatio"),
                   is_secure=True,
                   is_connect_key=True),
 }

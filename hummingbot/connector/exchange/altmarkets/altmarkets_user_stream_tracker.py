@@ -15,13 +15,13 @@ from hummingbot.core.utils.async_utils import (
     safe_ensure_future,
     safe_gather,
 )
-from hummingbot.connector.exchange.altmarkets.altmarkets_api_user_stream_data_source import \
-    AltmarketsAPIUserStreamDataSource
-from hummingbot.connector.exchange.altmarkets.altmarkets_auth import AltmarketsAuth
-from hummingbot.connector.exchange.altmarkets.altmarkets_constants import Constants
+from hummingbot.connector.exchange.peatio.peatio_api_user_stream_data_source import \
+    PeatioAPIUserStreamDataSource
+from hummingbot.connector.exchange.peatio.peatio_auth import PeatioAuth
+from hummingbot.connector.exchange.peatio.peatio_constants import Constants
 
 
-class AltmarketsUserStreamTracker(UserStreamTracker):
+class PeatioUserStreamTracker(UserStreamTracker):
     _cbpust_logger: Optional[HummingbotLogger] = None
 
     @classmethod
@@ -31,10 +31,10 @@ class AltmarketsUserStreamTracker(UserStreamTracker):
         return cls._bust_logger
 
     def __init__(self,
-                 altmarkets_auth: Optional[AltmarketsAuth] = None,
+                 peatio_auth: Optional[PeatioAuth] = None,
                  trading_pairs: Optional[List[str]] = []):
         super().__init__()
-        self._altmarkets_auth: AltmarketsAuth = altmarkets_auth
+        self._peatio_auth: PeatioAuth = peatio_auth
         self._trading_pairs: List[str] = trading_pairs
         self._ev_loop: asyncio.events.AbstractEventLoop = asyncio.get_event_loop()
         self._data_source: Optional[UserStreamTrackerDataSource] = None
@@ -48,8 +48,8 @@ class AltmarketsUserStreamTracker(UserStreamTracker):
         :return: OrderBookTrackerDataSource
         """
         if not self._data_source:
-            self._data_source = AltmarketsAPIUserStreamDataSource(
-                altmarkets_auth=self._altmarkets_auth,
+            self._data_source = PeatioAPIUserStreamDataSource(
+                peatio_auth=self._peatio_auth,
                 trading_pairs=self._trading_pairs
             )
         return self._data_source

@@ -13,15 +13,15 @@ from typing import (
 )
 from websockets.exceptions import ConnectionClosed
 from hummingbot.logger import HummingbotLogger
-from hummingbot.connector.exchange.altmarkets.altmarkets_constants import Constants
-from hummingbot.connector.exchange.altmarkets.altmarkets_auth import AltmarketsAuth
-from hummingbot.connector.exchange.altmarkets.altmarkets_utils import RequestId
+from hummingbot.connector.exchange.peatio.peatio_constants import Constants
+from hummingbot.connector.exchange.peatio.peatio_auth import PeatioAuth
+from hummingbot.connector.exchange.peatio.peatio_utils import RequestId
 
 # reusable websocket class
 # ToDo: We should eventually remove this class, and instantiate web socket connection normally (see Binance for example)
 
 
-class AltmarketsWebsocket(RequestId):
+class PeatioWebsocket(RequestId):
     _logger: Optional[HummingbotLogger] = None
 
     @classmethod
@@ -30,8 +30,8 @@ class AltmarketsWebsocket(RequestId):
             cls._logger = logging.getLogger(__name__)
         return cls._logger
 
-    def __init__(self, auth: Optional[AltmarketsAuth] = None):
-        self._auth: Optional[AltmarketsAuth] = auth
+    def __init__(self, auth: Optional[PeatioAuth] = None):
+        self._auth: Optional[PeatioAuth] = auth
         self._isPrivate = True if self._auth is not None else False
         self._WS_URL = Constants.WS_PRIVATE_URL if self._isPrivate else Constants.WS_PUBLIC_URL
         self._client: Optional[websockets.WebSocketClientProtocol] = None

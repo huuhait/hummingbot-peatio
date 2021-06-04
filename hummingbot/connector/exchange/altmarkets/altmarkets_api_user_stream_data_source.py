@@ -11,12 +11,12 @@ from typing import (
 )
 from hummingbot.core.data_type.user_stream_tracker_data_source import UserStreamTrackerDataSource
 from hummingbot.logger import HummingbotLogger
-from .altmarkets_constants import Constants
-from .altmarkets_auth import AltmarketsAuth
-from .altmarkets_websocket import AltmarketsWebsocket
+from .peatio_constants import Constants
+from .peatio_auth import PeatioAuth
+from .peatio_websocket import PeatioWebsocket
 
 
-class AltmarketsAPIUserStreamDataSource(UserStreamTrackerDataSource):
+class PeatioAPIUserStreamDataSource(UserStreamTrackerDataSource):
 
     _logger: Optional[HummingbotLogger] = None
 
@@ -26,13 +26,13 @@ class AltmarketsAPIUserStreamDataSource(UserStreamTrackerDataSource):
             cls._logger = logging.getLogger(__name__)
         return cls._logger
 
-    def __init__(self, altmarkets_auth: AltmarketsAuth, trading_pairs: Optional[List[str]] = []):
-        self._altmarkets_auth: AltmarketsAuth = altmarkets_auth
+    def __init__(self, peatio_auth: PeatioAuth, trading_pairs: Optional[List[str]] = []):
+        self._peatio_auth: PeatioAuth = peatio_auth
         self._trading_pairs = trading_pairs
         self._current_listen_key = None
         self._listen_for_user_stream_task = None
         self._last_recv_time: float = 0
-        self._ws: AltmarketsWebsocket = None
+        self._ws: PeatioWebsocket = None
         super().__init__()
 
     @property
@@ -49,7 +49,7 @@ class AltmarketsAPIUserStreamDataSource(UserStreamTrackerDataSource):
         """
 
         try:
-            self._ws = AltmarketsWebsocket(self._altmarkets_auth)
+            self._ws = PeatioWebsocket(self._peatio_auth)
 
             await self._ws.connect()
 

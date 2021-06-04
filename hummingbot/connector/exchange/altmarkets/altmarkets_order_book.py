@@ -11,13 +11,13 @@ from hummingbot.core.data_type.order_book import OrderBook
 from hummingbot.core.data_type.order_book_message import (
     OrderBookMessage, OrderBookMessageType
 )
-from hummingbot.connector.exchange.altmarkets.altmarkets_constants import Constants
-from hummingbot.connector.exchange.altmarkets.altmarkets_order_book_message import AltmarketsOrderBookMessage
+from hummingbot.connector.exchange.peatio.peatio_constants import Constants
+from hummingbot.connector.exchange.peatio.peatio_order_book_message import PeatioOrderBookMessage
 
 _logger = None
 
 
-class AltmarketsOrderBook(OrderBook):
+class PeatioOrderBook(OrderBook):
     @classmethod
     def logger(cls) -> HummingbotLogger:
         global _logger
@@ -34,13 +34,13 @@ class AltmarketsOrderBook(OrderBook):
         Convert json snapshot data into standard OrderBookMessage format
         :param msg: json snapshot data from live web socket stream
         :param timestamp: timestamp attached to incoming data
-        :return: AltmarketsOrderBookMessage
+        :return: PeatioOrderBookMessage
         """
 
         if metadata:
             msg.update(metadata)
 
-        return AltmarketsOrderBookMessage(
+        return PeatioOrderBookMessage(
             message_type=OrderBookMessageType.SNAPSHOT,
             content=msg,
             timestamp=timestamp
@@ -52,9 +52,9 @@ class AltmarketsOrderBook(OrderBook):
         *used for backtesting
         Convert a row of snapshot data into standard OrderBookMessage format
         :param record: a row of snapshot data from the database
-        :return: AltmarketsOrderBookMessage
+        :return: PeatioOrderBookMessage
         """
-        return AltmarketsOrderBookMessage(
+        return PeatioOrderBookMessage(
             message_type=OrderBookMessageType.SNAPSHOT,
             content=record.json,
             timestamp=record.timestamp
@@ -69,13 +69,13 @@ class AltmarketsOrderBook(OrderBook):
         Convert json diff data into standard OrderBookMessage format
         :param msg: json diff data from live web socket stream
         :param timestamp: timestamp attached to incoming data
-        :return: AltmarketsOrderBookMessage
+        :return: PeatioOrderBookMessage
         """
 
         if metadata:
             msg.update(metadata)
 
-        return AltmarketsOrderBookMessage(
+        return PeatioOrderBookMessage(
             message_type=OrderBookMessageType.DIFF,
             content=msg,
             timestamp=timestamp
@@ -87,9 +87,9 @@ class AltmarketsOrderBook(OrderBook):
         *used for backtesting
         Convert a row of diff data into standard OrderBookMessage format
         :param record: a row of diff data from the database
-        :return: AltmarketsOrderBookMessage
+        :return: PeatioOrderBookMessage
         """
-        return AltmarketsOrderBookMessage(
+        return PeatioOrderBookMessage(
             message_type=OrderBookMessageType.DIFF,
             content=record.json,
             timestamp=record.timestamp
@@ -103,7 +103,7 @@ class AltmarketsOrderBook(OrderBook):
         """
         Convert a trade data into standard OrderBookMessage format
         :param record: a trade data from the database
-        :return: AltmarketsOrderBookMessage
+        :return: PeatioOrderBookMessage
         """
 
         if metadata:
@@ -116,7 +116,7 @@ class AltmarketsOrderBook(OrderBook):
             "amount": msg.get("amount"),
         })
 
-        return AltmarketsOrderBookMessage(
+        return PeatioOrderBookMessage(
             message_type=OrderBookMessageType.TRADE,
             content=msg,
             timestamp=timestamp
@@ -128,9 +128,9 @@ class AltmarketsOrderBook(OrderBook):
         *used for backtesting
         Convert a row of trade data into standard OrderBookMessage format
         :param record: a row of trade data from the database
-        :return: AltmarketsOrderBookMessage
+        :return: PeatioOrderBookMessage
         """
-        return AltmarketsOrderBookMessage(
+        return PeatioOrderBookMessage(
             message_type=OrderBookMessageType.TRADE,
             content=record.json,
             timestamp=record.timestamp

@@ -9,8 +9,8 @@ from os.path import join, realpath
 from typing import Dict, Optional, List
 from hummingbot.core.event.event_logger import EventLogger
 from hummingbot.core.event.events import OrderBookEvent, OrderBookTradeEvent, TradeType
-from hummingbot.connector.exchange.altmarkets.altmarkets_order_book_tracker import AltmarketsOrderBookTracker
-from hummingbot.connector.exchange.altmarkets.altmarkets_api_order_book_data_source import AltmarketsAPIOrderBookDataSource
+from hummingbot.connector.exchange.peatio.peatio_order_book_tracker import PeatioOrderBookTracker
+from hummingbot.connector.exchange.peatio.peatio_api_order_book_data_source import PeatioAPIOrderBookDataSource
 from hummingbot.core.data_type.order_book import OrderBook
 from hummingbot.logger.struct_logger import METRICS_LOG_LEVEL
 
@@ -19,8 +19,8 @@ sys.path.insert(0, realpath(join(__file__, "../../../../../")))
 logging.basicConfig(level=METRICS_LOG_LEVEL)
 
 
-class AltmarketsOrderBookTrackerUnitTest(unittest.TestCase):
-    order_book_tracker: Optional[AltmarketsOrderBookTracker] = None
+class PeatioOrderBookTrackerUnitTest(unittest.TestCase):
+    order_book_tracker: Optional[PeatioOrderBookTracker] = None
     events: List[OrderBookEvent] = [
         OrderBookEvent.TradeEvent
     ]
@@ -32,7 +32,7 @@ class AltmarketsOrderBookTrackerUnitTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.ev_loop: asyncio.BaseEventLoop = asyncio.get_event_loop()
-        cls.order_book_tracker: AltmarketsOrderBookTracker = AltmarketsOrderBookTracker(cls.trading_pairs)
+        cls.order_book_tracker: PeatioOrderBookTracker = PeatioOrderBookTracker(cls.trading_pairs)
         cls.order_book_tracker.start()
         cls.ev_loop.run_until_complete(cls.wait_til_tracker_ready())
 
@@ -97,7 +97,7 @@ class AltmarketsOrderBookTrackerUnitTest(unittest.TestCase):
 
     def test_api_get_last_traded_prices(self):
         prices = self.ev_loop.run_until_complete(
-            AltmarketsAPIOrderBookDataSource.get_last_traded_prices(["BTC-USDT", "ROGER-BTC"]))
+            PeatioAPIOrderBookDataSource.get_last_traded_prices(["BTC-USDT", "ROGER-BTC"]))
         print("\n")
         for key, value in prices.items():
             print(f"{key} last_trade_price: {value}")

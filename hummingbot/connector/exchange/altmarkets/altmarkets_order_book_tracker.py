@@ -2,7 +2,7 @@
 import asyncio
 import bisect
 import logging
-from hummingbot.connector.exchange.altmarkets.altmarkets_constants import Constants
+from hummingbot.connector.exchange.peatio.peatio_constants import Constants
 import time
 
 from collections import defaultdict, deque
@@ -10,13 +10,13 @@ from typing import Optional, Dict, List, Deque
 from hummingbot.core.data_type.order_book_message import OrderBookMessageType
 from hummingbot.logger import HummingbotLogger
 from hummingbot.core.data_type.order_book_tracker import OrderBookTracker
-from hummingbot.connector.exchange.altmarkets.altmarkets_order_book_message import AltmarketsOrderBookMessage
-from hummingbot.connector.exchange.altmarkets.altmarkets_active_order_tracker import AltmarketsActiveOrderTracker
-from hummingbot.connector.exchange.altmarkets.altmarkets_api_order_book_data_source import AltmarketsAPIOrderBookDataSource
-from hummingbot.connector.exchange.altmarkets.altmarkets_order_book import AltmarketsOrderBook
+from hummingbot.connector.exchange.peatio.peatio_order_book_message import PeatioOrderBookMessage
+from hummingbot.connector.exchange.peatio.peatio_active_order_tracker import PeatioActiveOrderTracker
+from hummingbot.connector.exchange.peatio.peatio_api_order_book_data_source import PeatioAPIOrderBookDataSource
+from hummingbot.connector.exchange.peatio.peatio_order_book import PeatioOrderBook
 
 
-class AltmarketsOrderBookTracker(OrderBookTracker):
+class PeatioOrderBookTracker(OrderBookTracker):
     _logger: Optional[HummingbotLogger] = None
 
     @classmethod
@@ -26,7 +26,7 @@ class AltmarketsOrderBookTracker(OrderBookTracker):
         return cls._logger
 
     def __init__(self, trading_pairs: Optional[List[str]] = None,):
-        super().__init__(AltmarketsAPIOrderBookDataSource(trading_pairs), trading_pairs)
+        super().__init__(PeatioAPIOrderBookDataSource(trading_pairs), trading_pairs)
 
         self._ev_loop: asyncio.BaseEventLoop = asyncio.get_event_loop()
         self._order_book_snapshot_stream: asyncio.Queue = asyncio.Queue()
@@ -34,10 +34,10 @@ class AltmarketsOrderBookTracker(OrderBookTracker):
         self._order_book_trade_stream: asyncio.Queue = asyncio.Queue()
         self._process_msg_deque_task: Optional[asyncio.Task] = None
         self._past_diffs_windows: Dict[str, Deque] = {}
-        self._order_books: Dict[str, AltmarketsOrderBook] = {}
-        self._saved_message_queues: Dict[str, Deque[AltmarketsOrderBookMessage]] = \
+        self._order_books: Dict[str, PeatioOrderBook] = {}
+        self._saved_message_queues: Dict[str, Deque[PeatioOrderBookMessage]] = \
             defaultdict(lambda: deque(maxlen=1000))
-        self._active_order_trackers: Dict[str, AltmarketsActiveOrderTracker] = defaultdict(AltmarketsActiveOrderTracker)
+        self._active_order_trackers: Dict[str, PeatioActiveOrderTracker] = defaultdict(PeatioActiveOrderTracker)
         self._order_book_stream_listener_task: Optional[asyncio.Task] = None
         self._order_book_trade_listener_task: Optional[asyncio.Task] = None
 
@@ -52,20 +52,20 @@ class AltmarketsOrderBookTracker(OrderBookTracker):
         """
         Update an order book with changes from the latest batch of received messages
         """
-        past_diffs_window: Deque[AltmarketsOrderBookMessage] = deque()
+        past_diffs_window: Deque[PeatioOrderBookMessage] = deque()
         self._past_diffs_windows[trading_pair] = past_diffs_window
 
         message_queue: asyncio.Queue = self._tracking_message_queues[trading_pair]
-        order_book: AltmarketsOrderBook = self._order_books[trading_pair]
-        active_order_tracker: AltmarketsActiveOrderTracker = self._active_order_trackers[trading_pair]
+        order_book: PeatioOrderBook = self._order_books[trading_pair]
+        active_order_tracker: PeatioActiveOrderTracker = self._active_order_trackers[trading_pair]
 
         last_message_timestamp: float = time.time()
         diff_messages_accepted: int = 0
 
         while True:
             try:
-                message: AltmarketsOrderBookMessage = None
-                saved_messages: Deque[AltmarketsOrderBookMessage] = self._saved_message_queues[trading_pair]
+                message: PeatioOrderBookMessage = None
+                saved_messages: Deque[PeatioOrderBookMessage] = self._saved_message_queues[trading_pair]
                 # Process saved messages first if there are any
                 if len(saved_messages) > 0:
                     message = saved_messages.popleft()
@@ -87,7 +87,7 @@ class AltmarketsOrderBookTracker(OrderBookTracker):
                         diff_messages_accepted = 0
                     last_message_timestamp = now
                 elif message.type is OrderBookMessageType.SNAPSHOT:
-                    past_diffs: List[AltmarketsOrderBookMessage] = list(past_diffs_window)
+                    past_diffs: List[PeatioOrderBookMessage] = list(past_diffs_window)
                     # only replay diffs later than snapshot, first update active order with snapshot then replay diffs
                     replay_position = bisect.bisect_right(past_diffs, message)
                     replay_diffs = past_diffs[replay_position:]

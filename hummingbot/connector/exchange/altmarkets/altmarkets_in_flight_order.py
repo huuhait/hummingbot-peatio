@@ -10,12 +10,12 @@ from hummingbot.core.event.events import (
     TradeType
 )
 from hummingbot.connector.in_flight_order_base import InFlightOrderBase
-from .altmarkets_constants import Constants
+from .peatio_constants import Constants
 
 s_decimal_0 = Decimal(0)
 
 
-class AltmarketsInFlightOrder(InFlightOrderBase):
+class PeatioInFlightOrder(InFlightOrderBase):
     def __init__(self,
                  client_order_id: str,
                  exchange_order_id: Optional[str],
@@ -65,7 +65,7 @@ class AltmarketsInFlightOrder(InFlightOrderBase):
         :param data: json data from API
         :return: formatted InFlightOrder
         """
-        retval = AltmarketsInFlightOrder(
+        retval = PeatioInFlightOrder(
             data["client_order_id"],
             data["exchange_order_id"],
             data["trading_pair"],

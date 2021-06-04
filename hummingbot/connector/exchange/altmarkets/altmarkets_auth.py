@@ -2,13 +2,13 @@ import hashlib
 import hmac
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
-from hummingbot.connector.exchange.altmarkets.altmarkets_constants import Constants
+from hummingbot.connector.exchange.peatio.peatio_constants import Constants
 
 
-class AltmarketsAuth():
+class PeatioAuth():
     """
     Auth class required by AltMarkets.io API
-    Learn more at https://altmarkets.io
+    Learn more at https://peatio.io
     """
     def __init__(self, api_key: str, secret_key: str):
         self.api_key = api_key

@@ -113,9 +113,9 @@ coinzoom_api_key = os.getenv("COINZOOM_API_KEY")
 coinzoom_secret_key = os.getenv("COINZOOM_SECRET_KEY")
 coinzoom_username = os.getenv("COINZOOM_USERNAME")
 
-# AltMarkets.io Test
-altmarkets_api_key = os.getenv("ALTMARKETS_API_KEY")
-altmarkets_secret_key = os.getenv("ALTMARKETS_SECRET_KEY")
+# peatio.io Test
+peatio_api_key = os.getenv("PEATIO_API_KEY")
+peatio_secret_key = os.getenv("PEATIO_SECRET_KEY")
 
 # Wallet Tests
 test_erc20_token_address = os.getenv("TEST_ERC20_TOKEN_ADDRESS")

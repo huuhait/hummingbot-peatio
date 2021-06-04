@@ -1,9 +1,9 @@
 # A single source of truth for constant variables related to the exchange
 class Constants:
-#    EXCHANGE_NAME = "altmarkets"
-#    REST_URL = "https://v2.altmarkets.io/api/v2/peatio"
-#    WS_PRIVATE_URL = "wss://v2.altmarkets.io/api/v2/ranger/private"
-#    WS_PUBLIC_URL = "wss://v2.altmarkets.io/api/v2/ranger/public"
+#    EXCHANGE_NAME = "peatio"
+#    REST_URL = "https://v2.peatio.io/api/v2/peatio"
+#    WS_PRIVATE_URL = "wss://v2.peatio.io/api/v2/ranger/private"
+#    WS_PUBLIC_URL = "wss://v2.peatio.io/api/v2/ranger/public"
 
     EXCHANGE_NAME = "coinharbour"
     REST_URL = "https://www.coinharbour.com.au/api/v2/peatio"

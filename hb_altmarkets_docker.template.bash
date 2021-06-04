@@ -1,10 +1,10 @@
-# hb_altmarkets_docker.bash
-# 
+# hb_peatio_docker.bash
+#
 # OPTIONS:
-# hb_altmarkets_docker.sh BUILD        # don't need to specify instance number here.
-# hb_altmarkets_docker.sh START X      # Where X is the hummingbot instance - can be any number but might as well start from 1 right?
+# hb_peatio_docker.sh BUILD        # don't need to specify instance number here.
+# hb_peatio_docker.sh START X      # Where X is the hummingbot instance - can be any number but might as well start from 1 right?
 #                                   # Can run as many instances as you like by repeating the command with new number
-# hb_altmarkets_docker.sh DEL X        # Where X is the MAX hummingbot instance - it will go through all instances up to this number and delete logs/data but NOT conf files
+# hb_peatio_docker.sh DEL X        # Where X is the MAX hummingbot instance - it will go through all instances up to this number and delete logs/data but NOT conf files
 
 
 # Change this to the path where you clones hummingbot to
